@@ -70,7 +70,9 @@ public class ScanActivity extends AppCompatActivity {
                 updateScanningStatus();
                 mNearestStrength = 0;
                 mNearestRecord = new byte[]{0};
-                mBluetoothAdapter.startLeScan(mScanCallback);
+                if(! mBluetoothAdapter.startLeScan(mScanCallback)){
+                    ((TextView)findViewById(R.id.nearest_advertisement)).setText(R.string.ble_scan_error);
+                }
             }
         });
 

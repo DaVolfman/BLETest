@@ -4,4 +4,5 @@
     <string name="update_b_label">Update</string>
     <string name="status_scanning">Scanning</string>
     <string name="status_not_scanning">Not Scanning</string>
+    <string name="ble_scan_error">Error Starting BLE Scan!</string>
 </resources>
