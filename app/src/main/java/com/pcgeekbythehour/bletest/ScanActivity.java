@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 public class ScanActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 1;
     private static final long SCAN_PERIOD = 10000l;
@@ -24,6 +26,11 @@ public class ScanActivity extends AppCompatActivity {
     private BluetoothAdapter.LeScanCallback mScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] advertisement) {
+            /*final byte[] iBeacon_prefix = {0x02, 0x01, 0x06, 0x1a, -1, 0x4c,0x00, 0x02, 0x15};
+            final byte[] beaconatorID = {'B', 'E', 'A', 'C', 'O', 'N', 'A', 'T', 'O', 'R'};
+            if(Arrays.equals(Arrays.copyOfRange(advertisement,5,8),iBeacon_prefix) &&
+                    Arrays.equals(Arrays.copyOfRange(advertisement,9,18),beaconatorID))*/
+
             if(mNearestStrength == 0 || mNearestStrength < rssi){
                 mNearestStrength = rssi;
                 mNearestRecord = advertisement;
@@ -49,7 +56,17 @@ public class ScanActivity extends AppCompatActivity {
             mNearestRecord = new byte[]{0};
             mHandler = new Handler();
         }
+        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
 
+        if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()){
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        if(mScanning)
+            mBluetoothAdapter.stopLeScan(mScanCallback);
+        mScanning = false;
         updateScanningStatus();
         updateScanResult();
 
@@ -75,14 +92,6 @@ public class ScanActivity extends AppCompatActivity {
                 }
             }
         });
-
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
-        if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()){
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
     }
 
     @Override
