@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 public class ScanActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final long SCAN_PERIOD = 10000l;
+    private static final long SCAN_PERIOD = 1500l;
 
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
@@ -26,12 +26,12 @@ public class ScanActivity extends AppCompatActivity {
     private BluetoothAdapter.LeScanCallback mScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] advertisement) {
-            /*final byte[] iBeacon_prefix = {0x02, 0x01, 0x06, 0x1a, -1, 0x4c,0x00, 0x02, 0x15};
-            final byte[] beaconatorID = {'B', 'E', 'A', 'C', 'O', 'N', 'A', 'T', 'O', 'R'};
-            if(Arrays.equals(Arrays.copyOfRange(advertisement,5,8),iBeacon_prefix) &&
-                    Arrays.equals(Arrays.copyOfRange(advertisement,9,18),beaconatorID))*/
+            final byte[] iBeacon_prefix = {0x02, 0x01, 0x06, 0x1a, -1, 0x4c,0x00, 0x02, 0x15};
+            final byte[] beaconatorID = {0x42, 0x45, 0x41, 0x43, 0x4f, 0x4e, 0x41, 0x54, 0x4f, 0x52};
 
-            if(mNearestStrength == 0 || mNearestStrength < rssi){
+            if(Arrays.equals(Arrays.copyOfRange(advertisement,0,9),iBeacon_prefix) &&
+                    Arrays.equals(Arrays.copyOfRange(advertisement,9,19),beaconatorID) &&
+                            (mNearestStrength == 0 || mNearestStrength < rssi)){
                 mNearestStrength = rssi;
                 mNearestRecord = advertisement;
             }
@@ -45,28 +45,24 @@ public class ScanActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
 
-        if(savedInstanceState != null /*&& savedInstanceState.containsKey("mScanning")*/){
-            mScanning = savedInstanceState.getBoolean("mScanning");
-            mNearestStrength = savedInstanceState.getInt("mNearestStrength");
-            mNearestRecord = savedInstanceState.getByteArray("mNearestRecord");
-            mHandler = (Handler)savedInstanceState.getParcelable("mHandler");
-        }else{
-            mScanning = false;
-            mNearestStrength = 0;
-            mNearestRecord = new byte[]{0};
-            mHandler = new Handler();
-        }
+        mScanning = false;
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
+        mHandler = new Handler();
+
+        if(savedInstanceState != null /*&& savedInstanceState.containsKey("mScanning")*/){
+            mNearestStrength = savedInstanceState.getInt("mNearestStrength");
+            mNearestRecord = savedInstanceState.getByteArray("mNearestRecord");
+        }else{
+            mNearestStrength = 0;
+            mNearestRecord = new byte[]{0};
+        }
 
         if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()){
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
-        if(mScanning)
-            mBluetoothAdapter.stopLeScan(mScanCallback);
-        mScanning = false;
         updateScanningStatus();
         updateScanResult();
 
@@ -96,7 +92,6 @@ public class ScanActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState){
-        savedInstanceState.putBoolean("mScanning",mScanning);
         savedInstanceState.putInt("mNearestStrength",mNearestStrength);
         savedInstanceState.putByteArray("mNearestRecord",mNearestRecord);
         super.onSaveInstanceState(savedInstanceState);
