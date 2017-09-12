@@ -27,7 +27,7 @@ public class ScanActivity extends AppCompatActivity {
         @Override
         public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] advertisement) {
             final byte[] iBeacon_prefix = {0x02, 0x01, 0x06, 0x1a, -1, 0x4c,0x00, 0x02, 0x15};
-            final byte[] beaconatorID = {0x42, 0x45, 0x41, 0x43, 0x4f, 0x4e, 0x41, 0x54, 0x4f, 0x52};
+            final byte[] beaconatorID = {'B', 'E', 'A', 'C', 'O', 'N', 'A', 'T', 'O', 'R'};
 
             if(Arrays.equals(Arrays.copyOfRange(advertisement,0,9),iBeacon_prefix) &&
                     Arrays.equals(Arrays.copyOfRange(advertisement,9,19),beaconatorID) &&
