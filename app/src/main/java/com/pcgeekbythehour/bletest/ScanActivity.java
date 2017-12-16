@@ -29,7 +29,8 @@ public class ScanActivity extends AppCompatActivity {
             final byte[] iBeacon_prefix = {0x02, 0x01, 0x06, 0x1a, -1, 0x4c,0x00, 0x02, 0x15};
             final byte[] beaconatorID = {'B', 'E', 'A', 'C', 'O', 'N', 'A', 'T', 'O', 'R'};
 
-            if(Arrays.equals(Arrays.copyOfRange(advertisement,0,9),iBeacon_prefix) &&
+            if(null != advertisement && advertisement.length > 19 &&
+                    Arrays.equals(Arrays.copyOfRange(advertisement,0,9),iBeacon_prefix) &&
                     Arrays.equals(Arrays.copyOfRange(advertisement,9,19),beaconatorID) &&
                             (mNearestStrength == 0 || mNearestStrength < rssi)){
                 mNearestStrength = rssi;
@@ -110,9 +111,20 @@ public class ScanActivity extends AppCompatActivity {
             ((TextView)findViewById(R.id.nearest_advertisement)).setText("None");
         }else{
             StringBuilder builder = new StringBuilder();
-            for(byte hh : mNearestRecord){
-                builder.append(String.format("%02x",hh));
-            }
+            int seriesnumber = 0;
+
+            //for(byte hh : mNearestRecord){
+            //    builder.append(String.format("%02x",hh));
+            //}
+            seriesnumber = mNearestRecord[24];
+            seriesnumber |= mNearestRecord[23]<<8;
+            seriesnumber |= mNearestRecord[22]<<16;
+            seriesnumber |= mNearestRecord[21]<<16;
+
+            builder.append("Series ").append(seriesnumber).append(", ");
+            builder.append("Group ").append(mNearestRecord[26] + (mNearestRecord[25]<<8)).append(", ");
+            builder.append("Sensor ").append(mNearestRecord[27]).append(", ");
+            builder.append(Integer.toString(mNearestRecord[28] * 100)).append("ppm CO2");
             ((TextView)findViewById(R.id.nearest_advertisement)).setText(builder.toString());
         }
     }

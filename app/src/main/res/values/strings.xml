@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BLETest</string>
+    <string name="app_name">diOx alpha</string>
     <string name="nearest_ble_device">Nearest BLE device:</string>
     <string name="update_b_label">Update</string>
     <string name="status_scanning">Scanning</string>
